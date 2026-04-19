@@ -6,26 +6,35 @@
 
 generator client {
   provider = "prisma-client"
-  output   = "../generated/prisma"
+  output   = "../node_modules/@prisma/client"
 }
 
 datasource db {
   provider = "postgresql"
-  url      = env("DATABASE URL")
 }
 
 model User {
     id Int @id @default(autoincrement())
-    username string @unique
-    email string @unique
-    password string
-    orders    Order[]
-    positions Position[]
+    username String @unique
+    email String @unique
+    password String
+    orders    Orders[]
+    position Position[]
     balances  Balance[]
+    tradeHistory TradeHistory[]
 }
 
 model Orders {
-
+    id Int @id @default(autoincrement())
+    userId    Int
+    symbol    String
+    type      String
+    status    String
+    price     Float
+    quantity  Float
+    tradeHistory TradeHistory[]
+    createdAt DateTime @default(now())
+    user      User     @relation(fields: [userId], references: [id])
 }
 
 model Balance {
@@ -34,4 +43,37 @@ model Balance {
   currency  String
   amount    Float    @default(0)
   user      User     @relation(fields: [userId], references: [id])
+}
+
+model TradeHistory {
+  id Int @id @default(autoincrement())
+  userId Int
+  orderId Int
+  symbol String
+  type String
+  status String
+  price Float
+  quantity Float
+  executedAt DateTime @default(now())
+
+  user User @relation(fields:[userId] , references :[id])
+  order Orders @relation(fields:[orderId] , references:[id])
+}
+
+model Position {
+  id Int @id @default(autoincrement())
+  userId Int
+  symbol String
+  type String
+  entryPrice Float
+  quantity Float
+  user User @relation(fields:[userId],references:[id])
+}
+
+model Instrument {
+    id Int @id @default(autoincrement())
+    symbol String
+    name String
+    tickSize Float
+    leverage Int
 }

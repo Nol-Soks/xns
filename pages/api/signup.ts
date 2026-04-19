@@ -1,27 +1,40 @@
 import type { NextApiRequest, NextApiResponse } from "next";
+import { PrismaClient } from "@prisma/client";
+import bcrypt from "bcryptjs";
+const prisma = new PrismaClient();
+
 type Credentials = {
   email: string;
   username: string;
   password: string;
 };
+
 type ResponseData = {
   message: string;
-  credentials?: Credentials;
 };
 
-export default function handler(
+export default async function handler(
   req: NextApiRequest,
   res: NextApiResponse<ResponseData>,
 ) {
   if (req.method == "POST") {
-    const { email, username, password } = req.body as Credentials;
-
-    res.json({
-      message: "Credentials recieved",
-      credentials: { email, username, password },
-    });
+    try {
+      const { email, username, password } = req.body as Credentials;
+      const hashedPassword = await bcrypt.hash(password, 9);
+      const newuser = await prisma.user.create({
+        data: {
+          username,
+          email,
+          password: hashedPassword,
+        },
+      });
+      return res.status(200).json({ message: "SignUp Successfull" });
+    } catch (error) {
+      return res
+        .status(400)
+        .json({ message: "Signin failed " + (error as Error).message });
+    }
   } else {
-    res.status(405).json({ message: "Invalid method" });
+    return res.status(405).json({ message: "Invalid method" });
   }
-  //res.status(200).json({ message: "Hello from Next.js!" });
 }
