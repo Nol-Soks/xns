@@ -1,7 +1,9 @@
 import type { NextApiRequest, NextApiResponse } from "next";
-import { PrismaClient } from "@prisma/client";
 import bcrypt from "bcryptjs";
-const prisma = new PrismaClient();
+import { PrismaClient } from "@/generated/prisma/client";
+const prisma = new PrismaClient({
+  accelerateUrl: process.env.ACCELERATE_URL!,
+});
 
 type Credentials = {
   email: string;
