@@ -1,7 +1,9 @@
 import type { NextApiRequest, NextApiResponse } from "next";
 
 import bcrypt from "bcryptjs";
-import { PrismaClient } from "@/generated/prisma/client";
+import { PrismaClient, User } from "@/generated/prisma/client";
+import { SigninSchema } from "../lib/zod";
+import { ApiResponse } from "../lib/response";
 const prisma = new PrismaClient({
   accelerateUrl: process.env.ACCELERATE_URL!,
 });
@@ -10,38 +12,47 @@ type Credentials = {
   username?: string;
   password: string;
 };
-type ResponseData = {
-  message: string;
-  credentials?: Credentials;
-};
 
 export default async function handler(
   req: NextApiRequest,
-  res: NextApiResponse<ResponseData>,
+  res: NextApiResponse<ApiResponse<User>>,
 ) {
   if (req.method == "POST") {
     try {
-      const { email, username, password } = req.body as Credentials;
+      const parsed = SigninSchema.parse(req.body);
+      const { email, username, password } = parsed as Credentials;
       const user = email
         ? await prisma.user.findUnique({ where: { email } })
         : await prisma.user.findUnique({ where: { username } });
       if (!user) {
-        return res.status(401).json({ message: "Username/Email not found" });
+        return res.status(401).json({
+          success: true,
+          message: "Username/Email not found",
+        });
       } else {
         const isValid = await bcrypt.compare(password, user.password);
         if (!isValid) {
-          return res.status(401).json({ message: "Incorrect Password" });
+          return res.status(401).json({
+            success: false,
+            message: "Incorrect Password",
+          });
         } else {
-          return res.status(200).json({ message: " SignIn Successul" });
+          return res
+            .status(200)
+            .json({ success: true, message: " SignIn Successul" });
         }
       }
     } catch (err) {
-      return res
-        .status(400)
-        .json({ message: "SignIn Unsuccessful " + (err as Error).message });
+      return res.status(400).json({
+        success: false,
+        message: "SignIn Unsuccessful " + (err as Error).message,
+      });
     }
   } else {
-    return res.status(405).json({ message: "Invalid method" });
+    return res.status(405).json({
+      success: false,
+      message: "Invalid method",
+    });
   }
   //res.status(200).json({ message: "Hello from Next.js!" });
 }

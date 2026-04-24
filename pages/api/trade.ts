@@ -1,61 +1,57 @@
 import type { NextApiRequest, NextApiResponse } from "next";
 
-import { PrismaClient, TradeHistory } from "@/generated/prisma/client";
+import { PrismaClient, TradeHistory, Orders } from "@/generated/prisma/client";
+import { TradeSchema } from "../lib/zod";
+import { ApiResponse } from "../lib/response";
 const prisma = new PrismaClient({
   accelerateUrl: process.env.ACCELERATE_URL!,
 });
 
-type ResponseData<T> = {
+type ResponseData = {
   message: string;
-  data?: T;
+  // data?: T;
 };
 export default async function Trade(
   req: NextApiRequest,
-  res: NextApiResponse<ResponseData<TradeHistory[]>>,
+  res: NextApiResponse<ApiResponse<TradeHistory>>,
 ) {
   if (req.method === "POST") {
     try {
-      const { userId, orderId, symbol, type, status, price, quantity } =
-        req.body;
-      const addTrade = await prisma.tradeHistory.create({
-        data: {
-          userId,
-          orderId,
-          symbol,
-          type,
-          status,
-          price,
-          quantity,
-        },
-      });
-      if (addTrade) {
+      const parsed = TradeSchema.parse(req.body);
+      const { userId, orderId, symbol, type, status, price, quantity } = parsed;
+      const [updateOrder, addTrade] = await prisma.$transaction([
+        prisma.orders.update({
+          where: { id: orderId },
+          data: { status },
+        }),
+        prisma.tradeHistory.create({
+          data: {
+            userId,
+            orderId,
+            symbol,
+            type,
+            status,
+            price,
+            quantity,
+          },
+        }),
+      ]);
+      if (addTrade && updateOrder) {
         return res.status(200).json({
-          message: "Succesfull added order to history",
+          success: true,
+          message: "Succesfull added order to history , status updated",
         });
       }
     } catch (err) {
       return res.status(400).json({
+        success: false,
         message: "Order addition Unsuccesfull " + (err as Error).message,
       });
     }
-  } else if (req.method === "GET") {
-    try {
-      const { userId } = req.body;
-      const getTradeHistory = await prisma.tradeHistory.findMany({
-        where: {
-          userId: userId,
-        },
-      });
-      if (getTradeHistory) {
-        return res.status(200).json({
-          message: "Trade history fetched successfully",
-          data: getTradeHistory,
-        });
-      }
-    } catch (err) {
-      res.status(400).json({ message: (err as Error).message });
-    }
   } else {
-    res.status(405).json({ message: "Wrong request method" });
+    res.status(405).json({
+      success: false,
+      message: "Wrong request method",
+    });
   }
 }
