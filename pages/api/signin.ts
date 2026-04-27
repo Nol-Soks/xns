@@ -4,9 +4,12 @@ import bcrypt from "bcryptjs";
 import { PrismaClient, User } from "@/generated/prisma/client";
 import { SigninSchema } from "../lib/zod";
 import { ApiResponse } from "../lib/response";
+import { getServerSession } from "next-auth";
+import { authOptions } from "./auth/[...nextauth]";
 const prisma = new PrismaClient({
   accelerateUrl: process.env.ACCELERATE_URL!,
 });
+
 type Credentials = {
   email?: string;
   username?: string;

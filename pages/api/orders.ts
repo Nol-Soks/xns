@@ -3,6 +3,8 @@ import type { NextApiRequest, NextApiResponse } from "next";
 import { Orders, PrismaClient } from "@/generated/prisma/client";
 import { OrdersSchema } from "../lib/zod";
 import { ApiResponse } from "../lib/response";
+import { getServerSession } from "next-auth";
+import { authOptions } from "./auth/[...nextauth]";
 const prisma = new PrismaClient({
   accelerateUrl: process.env.ACCELERATE_URL!,
 });
@@ -19,6 +21,12 @@ export default async function Trade(
 ) {
   if (req.method === "POST") {
     try {
+      const session = await getServerSession(req, res, authOptions);
+      if (!session) {
+        return res
+          .status(401)
+          .json({ success: false, message: "Invalid User" });
+      }
       const parsed = OrdersSchema.parse(req.body);
       const { userId, symbol, type, quantity } = parsed;
       const calculatedPrice = await getMarketPrice(symbol);
