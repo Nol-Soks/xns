@@ -14,25 +14,23 @@ async function getMarketPrice(symbol: string) {
   return price;
 }
 
-export default async function Trade(
+export default async function Order(
   req: NextApiRequest,
 
   res: NextApiResponse<ApiResponse<Orders[]>>,
 ) {
+  const session = await getServerSession(req, res, authOptions);
+  if (!session) {
+    return res.status(401).json({ success: false, message: "Invalid User" });
+  }
   if (req.method === "POST") {
     try {
-      const session = await getServerSession(req, res, authOptions);
-      if (!session) {
-        return res
-          .status(401)
-          .json({ success: false, message: "Invalid User" });
-      }
       const parsed = OrdersSchema.parse(req.body);
-      const { userId, symbol, type, quantity } = parsed;
+      const { symbol, type, quantity } = parsed;
       const calculatedPrice = await getMarketPrice(symbol);
       const addOrder = await prisma.orders.create({
         data: {
-          userId,
+          userId: session.user.id,
           symbol,
           type,
           status: "Pending",
@@ -50,10 +48,10 @@ export default async function Trade(
     }
   } else if (req.method === "GET") {
     try {
-      const { userId } = req.body;
+      // const { userId } = req.body;
       const getOrder = await prisma.orders.findMany({
         where: {
-          userId: userId,
+          userId: session.user.id,
         },
       });
       return res.status(200).json({

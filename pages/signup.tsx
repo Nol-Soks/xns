@@ -26,12 +26,6 @@ export default function SignIn() {
       console.log("Error while contacting api/signin");
       console.log(error);
     }
-    const res = await axios.post("api/signin", {
-      username,
-      email,
-      password,
-    });
-    console.log(res.data);
   }
   return (
     <div>

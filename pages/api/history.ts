@@ -1,7 +1,7 @@
 import { NextApiRequest, NextApiResponse } from "next";
 
 import { PrismaClient, TradeHistory } from "@/generated/prisma/client";
-import { HistorySchema } from "../lib/zod";
+// import { HistorySchema } from "../lib/zod";
 import { ApiResponse } from "../lib/response";
 import { getServerSession } from "next-auth";
 import { authOptions } from "./auth/[...nextauth]";
@@ -21,11 +21,11 @@ export default async function History(
           .status(401)
           .json({ success: false, message: "Invalid User" });
       }
-      const parsed = HistorySchema.parse(req.body);
-      const { userId } = parsed;
+      // const parsed = HistorySchema.parse(req.body);
+      // const { userId } = parsed;
       const getTradeHistory = await prisma.tradeHistory.findMany({
         where: {
-          userId: userId,
+          userId: session.user.id,
         },
       });
       return res.status(200).json({

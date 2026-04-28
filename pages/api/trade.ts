@@ -17,16 +17,14 @@ export default async function Trade(
   req: NextApiRequest,
   res: NextApiResponse<ApiResponse<TradeHistory>>,
 ) {
+  const session = await getServerSession(req, res, authOptions);
+  if (!session) {
+    return res.status(401).json({ success: false, message: "Unauthorized" });
+  }
   if (req.method === "POST") {
     try {
-      const session = await getServerSession(req, res, authOptions);
-      if (!session) {
-        return res
-          .status(401)
-          .json({ success: false, message: "Invalid User" });
-      }
       const parsed = TradeSchema.parse(req.body);
-      const { userId, orderId, symbol, type, status, price, quantity } = parsed;
+      const { orderId, symbol, type, status, price, quantity } = parsed;
       const [updateOrder, addTrade] = await prisma.$transaction([
         prisma.orders.update({
           where: { id: orderId },
@@ -34,7 +32,7 @@ export default async function Trade(
         }),
         prisma.tradeHistory.create({
           data: {
-            userId,
+            userId: session.user.id,
             orderId,
             symbol,
             type,

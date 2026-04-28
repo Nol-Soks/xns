@@ -1,5 +1,6 @@
 import axios from "axios";
 import { useRef } from "react";
+import { signIn } from "next-auth/react";
 
 export default function SignIn() {
   const usernameRef = useRef<HTMLInputElement>(null);
@@ -14,20 +15,20 @@ export default function SignIn() {
       alert("Input fields are manadatory");
     }
     try {
-      const res = await axios.post("api/signin", {
+      const res = await signIn("credentials", {
         usernamemail,
         password,
+        redirect: false,
       });
-      console.log(res.data);
+      if (res?.error) {
+        console.error("Login Failed", res.error);
+      } else {
+        console.log("Loging succesful");
+      }
     } catch (error) {
       console.log("Error while contacting api/signin");
       console.log(error);
     }
-    const res = await axios.post("api/signin", {
-      usernamemail,
-      password,
-    });
-    console.log(res.data);
   }
   return (
     <div>

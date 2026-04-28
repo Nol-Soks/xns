@@ -33,10 +33,11 @@ export default async function handler(
         success: true,
         message: "SignUp Successfull",
       });
-    } catch (error) {
+    } catch (e) {
+      console.log(e);
       return res.status(400).json({
         success: false,
-        message: "Signin failed " + (error as Error).message,
+        message: "Signup failed ",
       });
     }
   } else {
