@@ -1,9 +1,12 @@
 export default function Dashboard() {
+  const handleHistoryButton = () => {};
+  const handleOrderButton = () => {};
+  const handlePriceButton = () => {};
   return (
     <div>
-      <button>Orders</button>
-      <button>Trade History</button>
-      <button>Prices</button>
+      <button onClick={handleOrderButton}>Orders</button>
+      <button onClick={handleHistoryButton}>TradeHistory</button>
+      <button onClick={handlePriceButton}>Prices</button>
     </div>
   );
 }
