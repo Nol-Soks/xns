@@ -1,5 +1,5 @@
 name = "xns-producer"
-main = "pages/api/order.ts"
+main = "pages/api/worker/producer.ts"
 compatibility_date = "2026-05-01"
 
 [[queues.producers]]

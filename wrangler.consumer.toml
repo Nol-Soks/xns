@@ -1,9 +1,10 @@
 name = "xns-consumer"
-main = "pages/api/consumer.ts"
+main = "pages/api/worker/consumer.ts"
 compatibility_date = "2026-05-01"
 
 [[queues.consumers]]
 queue = "orders"
+biding = "ORDERS"
 
 [vars]
 ACCELERATE_URL = "prisma://accelerate.prisma-data.net/?api_key=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJqd3RfaWQiOjEsInNlY3VyZV9rZXkiOiJza19VVk5fZVJ0b0JpemxKX0JBUWNBazciLCJhcGlfa2V5IjoiMDFLUFJHVFo2MEJFWFA5SjcyUTNSWkZaUVciLCJ0ZW5hbnRfaWQiOiIzZWMxMzE5NTUzYmEwN2MxYTFkNDFhNmI4MGVhMGU3OTY1MTY0MTAzODBiNzYzZjE2MTAyYWM3Y2U2ZWIzODU4IiwiaW50ZXJuYWxfc2VjcmV0IjoiY2NlNmRmNjMtZmRkYi00MjYzLWE5ZjAtOTAyNDk5YjYwNTMxIn0.1-Xoq-0XvIHaJchsxbxpFxZDxj_fg1oDRXjRY_3B2iQ"

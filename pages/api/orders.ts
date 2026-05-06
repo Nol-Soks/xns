@@ -39,9 +39,16 @@ export default async function handler(
         },
       });
 
-      // 🔑 Push into Cloudflare Queue
-      // Wrangler.toml must bind ORDERS to your queue
-      await (globalThis as any).env.ORDERS.send(JSON.stringify(newOrder));
+      await fetch(process.env.WORKER_PRODUCER_URL!, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          orderId: newOrder.id,
+          symbol: newOrder.symbol,
+          type: newOrder.type,
+          quantity: newOrder.quantity,
+        }),
+      });
 
       return res.status(200).json({
         success: true,
