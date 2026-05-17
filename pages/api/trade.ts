@@ -13,6 +13,7 @@ const prisma = new PrismaClient({
 //   message: string;
 //   // data?: T;
 // };
+//
 export default async function Trade(
   req: NextApiRequest,
   res: NextApiResponse<ApiResponse<TradeHistory>>,
